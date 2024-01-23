@@ -645,7 +645,7 @@ class FBXTreeParser {
 				case 'DiffuseColor':
 				case 'Maya|TEX_color_map':
 					parameters.map = scope.getTexture( textureMap, child.ID );
-					if ( parameters.map !== undefined ) {
+					if ( parameters.map !== null ) {
 
 						parameters.map.colorSpace = SRGBColorSpace;
 
