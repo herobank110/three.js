@@ -726,7 +726,13 @@ class FBXTreeParser {
 
 		}
 
-		return textureMap.get( id );
+		// Materials expect `null` if no map is used and will produce 
+		// a false warning if `undefined` is used.
+		let result = textureMap.get( id ) ?? null;
+		if ( result === null ) {
+			console.warn( 'THREE.FBXLoader: THREE.FBXLoader: Couldn\'t find texture ' + id + '.' );
+		}
+		return result;
 
 	}
 
