@@ -52,13 +52,17 @@ class PC2Loader extends Loader {
 
 	parse( text ) {
 
+		return;
+
 		const container = new Group();
 
         const material = new PointsMaterial( { size: 1, sizeAttenuation: false } );
 
         const buffergeometry = new BufferGeometry();
 
-        buffergeometry.setAttribute( 'position', new Float32BufferAttribute( state.vertices, 3 ) );
+		const vertices = []
+
+        buffergeometry.setAttribute( 'position', new Float32BufferAttribute( vertices, 3 ) );
 
         const points = new Points( buffergeometry, material );
         container.add( points );

@@ -34,6 +34,7 @@
 			import * as THREE from 'three';
 
 			import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+			import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 			import { PC2Loader } from 'three/addons/loaders/PC2Loader.js';
 
 			let camera, scene, renderer;
@@ -57,19 +58,25 @@
 				controls.minDistance = 1;
 				controls.maxDistance = 8;
 
+				const fbxLoader = new FBXLoader()
+					.setPath( 'models/pc2/' );
+
 				const pc2Loader = new PC2Loader()
 					.setPath( 'models/pc2/' );
 
 				const [ model, anim ] = await Promise.all( [
-					new Promise(resolve => resolve()),
+					fbxLoader.loadAsync( 'bendcube.fbx' ),
 					pc2Loader.loadAsync( 'bendcube.pc2' ),
 				] );
 
 				// model
 
-				model.position.y = 0.25;
-				model.position.z = - 0.25;
+				model.material = new THREE.MeshBasicMaterial( { color: 0xffffff } )
+				console.log(model.material)
+				model.scale.set( 0.01, 0.01, 0.01 );
 				scene.add( model );
+
+				scene.add(new THREE.DirectionalLight( { color: 0xffffff, intensity: 1.0 } ))
 
 				window.addEventListener( 'resize', onWindowResize );
 
