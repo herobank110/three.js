@@ -70,7 +70,7 @@ function Loader( editor ) {
 		const reader = new FileReader();
 		reader.addEventListener( 'progress', function ( event ) {
 
-			const size = '(' + Math.floor( event.total / 1000 ).format() + ' KB)';
+			const size = '(' + editor.utils.formatNumber( Math.floor( event.total / 1000 ) ) + ' KB)';
 			const progress = Math.floor( ( event.loaded / event.total ) * 100 ) + '%';
 
 			console.log( 'Loading', filename, size, progress );
@@ -99,7 +99,7 @@ function Loader( editor ) {
 
 					}, function ( error ) {
 
-						console.error( error )
+						console.error( error );
 
 					} );
 
@@ -376,29 +376,6 @@ function Loader( editor ) {
 
 			}
 
-			case 'ifc':
-
-			{
-
-				reader.addEventListener( 'load', async function ( event ) {
-
-					const { IFCLoader } = await import( 'three/addons/loaders/IFCLoader.js' );
-
-					var loader = new IFCLoader();
-					loader.ifcManager.setWasmPath( 'three/addons/loaders/ifc/' );
-
-					const model = await loader.parse( event.target.result );
-					model.mesh.name = filename;
-
-					editor.execute( new AddObjectCommand( editor, model.mesh ) );
-
-				}, false );
-				reader.readAsArrayBuffer( file );
-
-				break;
-
-			}
-
 			case 'kmz':
 
 			{
@@ -506,7 +483,7 @@ function Loader( editor ) {
 
 					const contents = event.target.result;
 
-					const { PCDLoader } = await import( '../../examples/jsm/loaders/PCDLoader.js' );
+					const { PCDLoader } = await import( 'three/addons/loaders/PCDLoader.js' );
 
 					const points = new PCDLoader().parse( contents );
 					points.name = filename;
@@ -653,7 +630,7 @@ function Loader( editor ) {
 
 					const contents = event.target.result;
 
-					const { USDZLoader } = await import( '../../examples/jsm/loaders/USDZLoader.js' );
+					const { USDZLoader } = await import( 'three/addons/loaders/USDZLoader.js' );
 
 					const group = new USDZLoader().parse( contents );
 					group.name = filename;
@@ -964,7 +941,7 @@ function Loader( editor ) {
 				{
 
 					const loader = await createGLTFLoader( manager );
-					
+
 					loader.parse( strFromU8( file ), '', function ( result ) {
 
 						const scene = result.scene;
@@ -997,7 +974,7 @@ function Loader( editor ) {
 		const dracoLoader = new DRACOLoader();
 		dracoLoader.setDecoderPath( '../examples/jsm/libs/draco/gltf/' );
 
-		const ktx2Loader = new KTX2Loader();
+		const ktx2Loader = new KTX2Loader( manager );
 		ktx2Loader.setTranscoderPath( '../examples/jsm/libs/basis/' );
 
 		editor.signals.rendererDetectKTX2Support.dispatch( ktx2Loader );

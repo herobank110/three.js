@@ -112,14 +112,6 @@
 			import { unzipSync } from 'three/addons/libs/fflate.module.js';
 			import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
 
-			import WebGL from 'three/addons/capabilities/WebGL.js';
-
-			if ( WebGL.isWebGL2Available() === false ) {
-
-				document.body.appendChild( WebGL.getWebGL2ErrorMessage() );
-
-			}
-
 			const DIMENSIONS = {
 				width: 256,
 				height: 256,
@@ -221,7 +213,7 @@
 
 						postProcessMaterial.uniforms.uTexture.value = texture;
 
-						animate();
+						renderer.setAnimationLoop( animate );
 
 					} );
 
@@ -237,8 +229,6 @@
 			}
 
 			function animate() {
-
-				requestAnimationFrame( animate );
 
 				let value = mesh.material.uniforms[ 'depth' ].value;
 
@@ -256,6 +246,8 @@
 				mesh.material.uniforms[ 'depth' ].value = value;
 
 				render();
+
+				stats.update();
 
 			}
 

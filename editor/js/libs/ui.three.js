@@ -3,9 +3,12 @@ import * as THREE from 'three';
 import { KTX2Loader } from 'three/addons/loaders/KTX2Loader.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { TGALoader } from 'three/addons/loaders/TGALoader.js';
+import { FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
 
 import { UISpan, UIDiv, UIRow, UIButton, UICheckbox, UIText, UINumber } from './ui.js';
 import { MoveObjectCommand } from '../commands/MoveObjectCommand.js';
+
+const cache = new Map();
 
 class UITexture extends UISpan {
 
@@ -51,17 +54,28 @@ class UITexture extends UISpan {
 			const extension = file.name.split( '.' ).pop().toLowerCase();
 			const reader = new FileReader();
 
-			if ( extension === 'hdr' || extension === 'pic' ) {
+			const hash = `${file.lastModified}_${file.size}_${file.name}`;
+
+			if ( cache.has( hash ) ) {
+
+				const texture = cache.get( hash );
+
+				scope.setValue( texture );
+
+				if ( scope.onChangeCallback ) scope.onChangeCallback( texture );
+
+			} else if ( extension === 'hdr' || extension === 'pic' ) {
 
 				reader.addEventListener( 'load', function ( event ) {
 
-					// assuming RGBE/Radiance HDR iamge format
+					// assuming RGBE/Radiance HDR image format
 
 					const loader = new RGBELoader();
 					loader.load( event.target.result, function ( hdrTexture ) {
 
 						hdrTexture.sourceFile = file.name;
-						hdrTexture.isHDRTexture = true;
+
+						cache.set( hash, hdrTexture );
 
 						scope.setValue( hdrTexture );
 
@@ -82,6 +96,8 @@ class UITexture extends UISpan {
 
 						texture.colorSpace = THREE.SRGBColorSpace;
 						texture.sourceFile = file.name;
+
+						cache.set( hash, texture );
 
 						scope.setValue( texture );
 
@@ -109,6 +125,9 @@ class UITexture extends UISpan {
 						texture.colorSpace = THREE.SRGBColorSpace;
 						texture.sourceFile = file.name;
 						texture.needsUpdate = true;
+
+						cache.set( hash, texture );
+
 						scope.setValue( texture );
 
 						if ( scope.onChangeCallback ) scope.onChangeCallback( texture );
@@ -130,6 +149,8 @@ class UITexture extends UISpan {
 						const texture = new THREE.Texture( this );
 						texture.sourceFile = file.name;
 						texture.needsUpdate = true;
+
+						cache.set( hash, texture );
 
 						scope.setValue( texture );
 
@@ -811,7 +832,7 @@ class UIBoolean extends UISpan {
 
 }
 
-let renderer;
+let renderer, fsQuad;
 
 function renderToCanvas( texture ) {
 
@@ -821,19 +842,18 @@ function renderToCanvas( texture ) {
 
 	}
 
+	if ( fsQuad === undefined ) {
+
+		fsQuad = new FullScreenQuad( new THREE.MeshBasicMaterial() );
+
+	}
+
 	const image = texture.image;
 
 	renderer.setSize( image.width, image.height, false );
 
-	const scene = new THREE.Scene();
-	const camera = new THREE.OrthographicCamera( - 1, 1, 1, - 1, 0, 1 );
-
-	const material = new THREE.MeshBasicMaterial( { map: texture } );
-	const quad = new THREE.PlaneGeometry( 2, 2 );
-	const mesh = new THREE.Mesh( quad, material );
-	scene.add( mesh );
-
-	renderer.render( scene, camera );
+	fsQuad.material.map = texture;
+	fsQuad.render( renderer );
 
 	return renderer.domElement;
 

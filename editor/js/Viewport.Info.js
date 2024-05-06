@@ -9,24 +9,29 @@ function ViewportInfo( editor ) {
 	container.setId( 'info' );
 	container.setPosition( 'absolute' );
 	container.setLeft( '10px' );
-	container.setBottom( '10px' );
+	container.setBottom( '20px' );
 	container.setFontSize( '12px' );
 	container.setColor( '#fff' );
 	container.setTextTransform( 'lowercase' );
 
-	const objectsText = new UIText( '0' ).setMarginLeft( '6px' );
-	const verticesText = new UIText( '0' ).setMarginLeft( '6px' );
-	const trianglesText = new UIText( '0' ).setMarginLeft( '6px' );
-	const frametimeText = new UIText( '0' ).setMarginLeft( '6px' );
+	const objectsText = new UIText( '0' ).setTextAlign( 'right' ).setWidth( '60px' ).setMarginRight( '6px' );
+	const verticesText = new UIText( '0' ).setTextAlign( 'right' ).setWidth( '60px' ).setMarginRight( '6px' );
+	const trianglesText = new UIText( '0' ).setTextAlign( 'right' ).setWidth( '60px' ).setMarginRight( '6px' );
+	const frametimeText = new UIText( '0' ).setTextAlign( 'right' ).setWidth( '60px' ).setMarginRight( '6px' );
 
-	container.add( new UIText( strings.getKey( 'viewport/info/objects' ) ), objectsText, new UIBreak() );
-	container.add( new UIText( strings.getKey( 'viewport/info/vertices' ) ), verticesText, new UIBreak() );
-	container.add( new UIText( strings.getKey( 'viewport/info/triangles' ) ), trianglesText, new UIBreak() );
-	container.add( new UIText( strings.getKey( 'viewport/info/frametime' ) ), frametimeText, new UIBreak() );
+	const objectsUnitText = new UIText( strings.getKey( 'viewport/info/objects' ) );
+	const verticesUnitText = new UIText( strings.getKey( 'viewport/info/vertices' ) );
+	const trianglesUnitText = new UIText( strings.getKey( 'viewport/info/triangles' ) );
+
+	container.add( objectsText, objectsUnitText, new UIBreak() );
+	container.add( verticesText, verticesUnitText, new UIBreak() );
+	container.add( trianglesText, trianglesUnitText, new UIBreak() );
+	container.add( frametimeText, new UIText( strings.getKey( 'viewport/info/rendertime' ) ), new UIBreak() );
 
 	signals.objectAdded.add( update );
 	signals.objectRemoved.add( update );
 	signals.geometryChanged.add( update );
+	signals.sceneRendered.add( updateFrametime );
 
 	//
 
@@ -70,17 +75,26 @@ function ViewportInfo( editor ) {
 
 		}
 
-		objectsText.setValue( objects.format() );
-		verticesText.setValue( vertices.format() );
-		trianglesText.setValue( triangles.format() );
+		objectsText.setValue( editor.utils.formatNumber( objects ) );
+		verticesText.setValue( editor.utils.formatNumber( vertices ) );
+		trianglesText.setValue( editor.utils.formatNumber( triangles ) );
+
+		const pluralRules = new Intl.PluralRules( editor.config.getKey( 'language' ) );
+
+		const objectsStringKey = ( pluralRules.select( objects ) === 'one' ) ? 'viewport/info/oneObject' : 'viewport/info/objects';
+		objectsUnitText.setValue( strings.getKey( objectsStringKey ) );
+
+		const verticesStringKey = ( pluralRules.select( vertices ) === 'one' ) ? 'viewport/info/oneVertex' : 'viewport/info/vertices';
+		verticesUnitText.setValue( strings.getKey( verticesStringKey ) );
+
+		const trianglesStringKey = ( pluralRules.select( triangles ) === 'one' ) ? 'viewport/info/oneTriangle' : 'viewport/info/triangles';
+		trianglesUnitText.setValue( strings.getKey( trianglesStringKey ) );
 
 	}
 
-	signals.sceneRendered.add( updateFrametime );
-
 	function updateFrametime( frametime ) {
 
-		frametimeText.setValue( Number( frametime ).toFixed( 2 ) + ' ms' );
+		frametimeText.setValue( Number( frametime ).toFixed( 2 ) );
 
 	}
 

@@ -67,14 +67,6 @@
 			import Stats from 'three/addons/libs/stats.module.js';
 			import { unzipSync } from 'three/addons/libs/fflate.module.js';
 
-			import WebGL from 'three/addons/capabilities/WebGL.js';
-
-			if ( WebGL.isWebGL2Available() === false ) {
-
-				document.body.appendChild( WebGL.getWebGL2ErrorMessage() );
-
-			}
-
 			let camera, scene, mesh, renderer, stats;
 
 			const planeWidth = 50;
@@ -83,7 +75,6 @@
 			let depthStep = 0.4;
 
 			init();
-			animate();
 
 			function init() {
 
@@ -132,6 +123,7 @@
 				renderer = new THREE.WebGLRenderer();
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
+				renderer.setAnimationLoop( animate );
 				container.appendChild( renderer.domElement );
 
 				stats = new Stats();
@@ -151,8 +143,6 @@
 			}
 
 			function animate() {
-
-				requestAnimationFrame( animate );
 
 				if ( mesh ) {
 
